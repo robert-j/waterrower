@@ -32,19 +32,14 @@ export class WaterRower extends events.EventEmitter {
         this.datapoints = options.datapoints;
 
         if (!options.portName) {
-            console.log('No port configured. Attempting to discover...');
             this.discoverPort(name => {
                 if (name) {
-                    console.log('Discovered a WaterRower on ' + name + '...');
                     options.portName = name;
                     this.setupSerialPort(options);
                 }
-                else
-                    console.log('We didn\'t find any connected WaterRowers');
             })
         }
         else {
-            console.log('Setting up serial port on ' + options.portName + '...');
             this.setupSerialPort(options);
         }
 
@@ -74,7 +69,6 @@ export class WaterRower extends events.EventEmitter {
         });
         // setup port events
         this.port.on('open', () => {
-            console.log(`A connection to the WaterRower has been established on ${options.portName}`);
             this.initialize();
             if (options.refreshRate !== 0) setInterval(() => this.requestDataPoints(this.datapoints), this.refreshRate);
         });
@@ -122,17 +116,17 @@ export class WaterRower extends events.EventEmitter {
 
     /// send a serial message
     private send(value): void {
-        if (this.port) this.port.write(value + '\r\n');
+        if (this.port) this.port.write(value + '\r\n', err => {
+            if (err) console.log(err);
+        });
     }
 
     /// initialize the connection    
     private initialize(): void {
-        console.log('Initializing port...');
         this.send('USB');
     }
 
     private close(): void {
-        console.log('Closing WaterRower...');
         this.emit('close');
         this.reads$.complete();
         if (this.port) {
@@ -144,7 +138,6 @@ export class WaterRower extends events.EventEmitter {
 
     /// reset console
     reset(): void {
-        console.log('Resetting WaterRower...');
         this.send('RESET'); //reset the waterrower 
     }
 
@@ -153,7 +146,6 @@ export class WaterRower extends events.EventEmitter {
     /// shortly after the request is made 
     requestDataPoints(points?: string | string[]): void {
         let req = (name: string): void => {
-            console.log('requesting ' + name);
             let dataPoint = find(datapoints, d => d.name == name);
             this.send(`IR${dataPoint.length}${dataPoint.address}`)
         }
