@@ -57,10 +57,6 @@ export class WaterRower extends events.EventEmitter {
         });
     }
 
-    get hasPort(): boolean {
-        return !!this.port;
-    }
-
     private setupSerialPort(options) {
         // setup the serial port
         this.port = new SerialPort(options.portName, {
