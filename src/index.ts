@@ -76,8 +76,7 @@ export class WaterRower extends events.EventEmitter {
             let type = find(types, t => t.pattern.test(d));
             this.reads$.next({ time: Date.now(), type: (type ? type.type : 'other'), data: d })
         });
-        this.port.on('closed', () => this.close);
-        this.port.on('disconnect', () => this.close)
+        this.port.on('close', () => this.close());
         this.port.on('error', err => {
             this.emit('error', err);
             this.close();
@@ -116,9 +115,10 @@ export class WaterRower extends events.EventEmitter {
 
     /// send a serial message
     private send(value): void {
-        if (this.port) this.port.write(value + '\r\n', err => {
-            if (err) console.log(err);
-        });
+        if (this.port) { 
+            this.port.write(value + '\r\n');
+            this.port.drain();
+        }
     }
 
     /// initialize the connection    
