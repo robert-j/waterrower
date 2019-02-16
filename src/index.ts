@@ -68,6 +68,7 @@ export class WaterRower extends events.EventEmitter {
         });
         // setup port events
         this.port.on('open', () => {
+            this.emit('open');
             this.initialize();
             if (options.refreshRate !== 0) setInterval(() => this.requestDataPoints(this.datapoints), this.refreshRate);
         });
