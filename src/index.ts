@@ -44,11 +44,6 @@ export class WaterRower extends events.EventEmitter {
         }
 
         this.setupStreams();
-
-        process.on('SIGINT', () => {
-            this.close();
-        });
-
     }
 
     private discoverPort(callback) {
@@ -60,6 +55,10 @@ export class WaterRower extends events.EventEmitter {
             if (p) callback(p.comName);
             else callback();
         });
+    }
+
+    get hasPort(): boolean {
+        return !!this.port;
     }
 
     private setupSerialPort(options) {
